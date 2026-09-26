@@ -36,7 +36,8 @@ PROVIDER_OPENROUTER = "openrouter"
 
 # --- Blue Team (LOCKED) ---
 BLUE_PROVIDER = PROVIDER_OPENROUTER
-BLUE_MODEL = "liquid/lfm-2.5-2.6b"
+# OpenRouter hiện chỉ serve slug có hậu tố ":free" (bare "liquid/lfm-2.5-2.6b" -> 404).
+BLUE_MODEL = "liquid/lfm-2.5-2.6b:free"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_OPENROUTER_MODEL = BLUE_MODEL  # alias
 
@@ -169,8 +170,17 @@ def get_openai_api_key() -> str:
     return os.environ.get("OPENAI_API_KEY", "").strip()
 
 
+def get_openai_base_url() -> str:
+    """Custom OpenAI-compatible endpoint (e.g. local proxy như Omniroute)."""
+    return os.environ.get("OPENAI_BASE_URL", "").strip()
+
+
 def red_openai_client_kwargs() -> dict:
-    return {"api_key": get_openai_api_key() or None}
+    kwargs: dict = {"api_key": get_openai_api_key() or None}
+    base_url = get_openai_base_url()
+    if base_url:
+        kwargs["base_url"] = base_url
+    return kwargs
 
 
 def red_provider_label(tier: str = "advance") -> str:
